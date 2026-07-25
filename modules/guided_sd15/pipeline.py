@@ -281,13 +281,25 @@ def generate(
     images = rescale(images, (-1, 1), (0, 255), clamp=True)
     # B C H W -> B H W C
     images = images.permute(0, 2, 3, 1)
+    
+    if cfg.pipeline.logging.save_yes_no_distributions:
+        _, yes_no_distribution = vlm_criterion(
+            image_rgb=images[0],
+            img_prompt=prompt,
+            target_yes=cfg.pipeline.guidance.target_yes,
+            give_me_distribution=cfg.pipeline.logging.save_yes_no_distributions
+        )
+
+        
+        yes_no_distributions[f'{g_tag}-after_update'] = yes_no_distribution
+    
     images = images.to('cpu', torch.uint8).numpy()
     
     
     if cfg.pipeline.logging.save_guidance_diffs:
         save_0_255_guidance_diffs(img_tensors=intermediate_finals, path=logging_save_guidance_diffs_path, tags=intermediate_finals_tags)
     
-    if cfg.pipeline.logging.save_yes_no_distributions:
+    if cfg.pipeline.logging.save_yes_no_distributions:    
         with open(logging_save_general_path / 'yes_no_distributions.json', 'w', encoding='utf-8') as f:
             json.dump(yes_no_distributions, f, ensure_ascii=False, indent=4)
     

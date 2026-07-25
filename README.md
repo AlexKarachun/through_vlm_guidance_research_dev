@@ -2,7 +2,7 @@
 
 setup
 ```shell
-git clone https://github.com/AlexKrachun/through_vlm_guidance_research_dev.git
+git clone https://github.com/AlexKarachun/through_vlm_guidance_research_dev.git
 cd through_vlm_guidance_research_dev
 conda env create -f environment.yml
 conda activate through_guidance
@@ -55,11 +55,16 @@ HYDRA_FULL_ERROR=1 python run.py\
 
 
 <!-- 
-todo
+done 
 - сделать график запусков в осях alignment/quality
 - построить p_yes траектории для лучших запусков с разных таймстепов. строить средние с дисперсией, чтобы было понятно, есть ли разница с какого шага начинать
-- запустить эксп на слишком много итераций гайденса
-- возмжоно для маленьких lr p_yes не будет так асцилировать
+
+
+todo
+- использовать более сильного judge
+- запустить эксп на слишком много итераций гайденса - возмжоно для маленьких lr vlm_loss не будет так асцилировать
+- возможно у нас взрываются градиенты. нарисовать график плотности чисел градиентов, нарисовать график норм градиентов при backward 50->0.
+
 
 
 - написать отчет для Айбека
@@ -85,7 +90,8 @@ how guided pipeline works
 потребление vram:
 - sd1.5 ~11gb
 - guided_sd1.5 ~23gb
-- judge ~18gb
+- judge Qwen/Qwen3-VL-8B-Instruct: ~18gb
+- judge Qwen/Qwen3-VL-32B-Instruct: ~18gb
 
 Автор исполнял код на 
 - RTX 3090 24gb vram

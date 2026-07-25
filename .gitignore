@@ -112,16 +112,16 @@ temp/
 experiments
 !datasets/image.png
 
-# Publishable Wave 1 report for GitHub Pages
+# Publishable Wave 5 report for GitHub Pages
 !experiments/
 experiments/*
-!experiments/wave_1/
-experiments/wave_1/*
-!experiments/wave_1/external/
-experiments/wave_1/external/*
-!experiments/wave_1/external/generate_wave_1_report.py
-!experiments/wave_1/external/wave_1_report.html
-!experiments/wave_1/external/wave_1_report_assets/
-!experiments/wave_1/external/wave_1_report_assets/**
-!experiments/wave_1/external/wave_1_report_charts/
-!experiments/wave_1/external/wave_1_report_charts/**
+!experiments/wave_5/
+experiments/wave_5/*
+!experiments/wave_5/external/
+experiments/wave_5/external/*
+!experiments/wave_5/external/generate_wave_5_report.py
+!experiments/wave_5/external/wave_5_report.html
+!experiments/wave_5/external/wave_5_report_assets/
+!experiments/wave_5/external/wave_5_report_assets/**
+!experiments/wave_5/external/wave_5_report_charts/
+!experiments/wave_5/external/wave_5_report_charts/**

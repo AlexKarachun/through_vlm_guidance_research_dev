@@ -5,7 +5,7 @@ import re
 
 import torch
 
-from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
+from transformers import AutoProcessor, AutoModelForMultimodalLM
 
 
 
@@ -23,7 +23,7 @@ class Qwen3Judge:
             cache_dir=cache_dir,
         )
 
-        self.model = Qwen3VLForConditionalGeneration.from_pretrained(
+        self.model = AutoModelForMultimodalLM.from_pretrained(
             model_id,
             cache_dir=cache_dir,
             dtype=self.dtype,
