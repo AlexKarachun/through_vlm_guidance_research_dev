@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wave 5 — VLM-guided image generation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --bg-soft: #f6f6f6;
+      --panel: #ffffff;
+      --panel-2: #f5f7fa;
+      --line: #b8b8b8;
+      --text: #111111;
+      --muted: #444444;
+      --heading: #000000;
+      --blue: #164f91;
+      --cyan: #176b75;
+      --green: #21845d;
+      --orange: #a76600;
+      --red: #b83b4a;
+      --max-width: 760px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.28 "Times New Roman", Times, serif;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { color: #9ccaff; text-decoration: underline; }
+    .layout {
+      width: min(var(--max-width), calc(100% - 40px));
+      margin: 0 auto;
+    }
+    header {
+      padding: 36px 0 28px;
+    }
+    .eyebrow {
+      padding-bottom: 4px;
+      border-bottom: 1px solid #111;
+      color: #111;
+      letter-spacing: 0;
+      font-size: 1rem;
+      font-weight: 400;
+    }
+    h1, h2, h3, h4 { color: var(--heading); font-family: "Times New Roman", Times, serif; }
+    h1 {
+      max-width: 720px;
+      margin: 70px 0 34px;
+      font-size: 2rem;
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin: 2.1rem 0 .7rem;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+    }
+    h3 { margin: 1.35rem 0 .45rem; font-size: 1rem; }
+    .authors { margin: 0 0 10px; text-align: center; font-weight: 700; line-height: 1.55; }
+    .affiliations { margin: 0; text-align: center; }
+    main section { padding: 0; border: 0; }
+    p { margin: .55rem 0; text-align: justify; }
+    #abstract { margin: 48px auto 36px; max-width: 650px; }
+    #abstract h2 { text-align: center; }
+    .abstract, .note {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+    .code-link {
+      margin-top: 1rem;
+      padding: .7rem .85rem;
+      border-left: 4px solid var(--blue);
+      background: linear-gradient(135deg, #fbfcfe 0%, #f4f7fb 100%);
+      color: #26364d;
+      text-align: left;
+    }
+    .code-link a {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    .code-link svg {
+      width: 1.05rem;
+      height: 1.05rem;
+      flex: 0 0 auto;
+      fill: currentColor;
+    }
+    .note { margin: 1rem 0; font-size: .93rem; }
+    .report-figure {
+      width: min(1080px, calc(100vw - 36px));
+      margin: 30px 50% 38px;
+      transform: translateX(-50%);
+      scroll-margin-top: 20px;
+    }
+    .figure-frame {
+      overflow: visible;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .figure-frame > .plotly-graph-div { min-height: 590px; }
+    .chart-frame {
+      display: block;
+      width: 100%;
+      border: 1.5px solid #c9d2df;
+      border-radius: 18px;
+      background: #fbfcfe;
+      box-shadow: 0 5px 16px rgba(27, 39, 64, .10);
+    }
+    .embedded-chart {
+      width: 100%;
+      overflow: hidden;
+      border: 1.5px solid #c9d2df;
+      border-radius: 18px;
+      background: #fbfcfe;
+      box-shadow: 0 5px 16px rgba(27, 39, 64, .10);
+    }
+    .embedded-chart .hover-info-bar {
+      min-height: 44px;
+      padding: 6px 75px 2px;
+      color: #334155;
+      font-size: 14px;
+      line-height: 1.3;
+    }
+    .embedded-chart-error {
+      padding: 20px;
+      color: #8a1f2d;
+      font-family: Arial, sans-serif;
+    }
+    .report-figure > figcaption {
+      max-width: 900px;
+      margin: 8px auto 0;
+      color: #111;
+      font-size: .88rem;
+      line-height: 1.25;
+      text-align: justify;
+    }
+    .report-figure > figcaption strong { color: #111; }
+    .full-image { display: block; width: 100%; border-radius: 0; }
+    .pipeline-image { max-width: 1000px; margin: 0 auto; }
+    .image-grid { display: grid; gap: 12px; }
+    .image-grid.sequence { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .image-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .image-card { min-width: 0; margin: 0; }
+    .image-card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border: 0;
+      border-radius: 0;
+    }
+    .image-card figcaption {
+      display: flex;
+      flex-direction: column;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.4;
+    }
+    .image-card figcaption strong { color: var(--text); }
+    .pair-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .pair-card { padding: 8px; border: 0; border-radius: 0; background: transparent; }
+    .pair-card h4 { min-height: 3em; margin: 0 0 4px; font-size: .95rem; }
+    .pair-card .delta { margin: 0 0 12px; color: var(--orange); font-size: .86rem; }
+    .trajectory-layout {
+      display: block;
+    }
+    .trajectory-plot .plotly-graph-div { min-height: 350px; }
+    .trajectory-panel {
+      position: static;
+      padding-top: 8px;
+      min-width: 0;
+      font-size: .78rem;
+      line-height: 1.25;
+    }
+    .trajectory-panel > strong {
+      display: block;
+      min-height: 0;
+      margin-bottom: 8px;
+      overflow-wrap: anywhere;
+    }
+    .trajectory-images {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .trajectory-images figure { margin: 0; min-width: 0; }
+    .trajectory-images img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+    .trajectory-images figcaption { margin-top: 3px; text-align: left; }
+    .comparison-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 18px;
+      align-items: start;
+    }
+    .comparison-panel {
+      position: sticky;
+      top: 12px;
+      padding-top: 22px;
+    }
+    .comparison-panel-heading {
+      min-height: 92px;
+      margin-bottom: 10px;
+      font-size: .88rem;
+      line-height: 1.25;
+    }
+    .comparison-panel-heading strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 1rem;
+    }
+    .comparison-panel-heading span { display: block; }
+    .comparison-images { display: grid; gap: 15px; }
+    .comparison-images figure { margin: 0; }
+    .comparison-image-label {
+      margin-bottom: 5px;
+      padding: 5px 8px;
+      border-left: 4px solid #8a94a3;
+      background: #f2f3f5;
+      color: #273142;
+      font: 700 .76rem/1.2 Arial, sans-serif;
+      letter-spacing: .045em;
+    }
+    .guided-example .comparison-image-label {
+      border-left-color: #2f78d0;
+      background: #edf5ff;
+      color: #174f91;
+    }
+    .comparison-images img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+    .comparison-images figcaption {
+      margin-top: 5px;
+      font-size: .78rem;
+      line-height: 1.2;
+      text-align: left;
+    }
+    code, pre { font-family: "SFMono-Regular", Consolas, monospace; }
+    code { color: #174f91; }
+    pre {
+      overflow-x: auto;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      background: #f5f7fa;
+      color: #26364d;
+      font-size: .78rem;
+      line-height: 1.35;
+    }
+    .todo-list li { margin: .65rem 0; padding-left: .3rem; }
+    footer { padding: 30px 0 50px; color: var(--muted); font-size: .8rem; text-align: center; }
+    .footer-content { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .telegram-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #246b9e;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .telegram-link:hover { text-decoration: underline; }
+    .telegram-link svg { width: 17px; height: 17px; fill: currentColor; }
+    @media (max-width: 850px) {
+      .image-grid.sequence { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .figure-frame > .plotly-graph-div { min-height: 520px; }
+      .trajectory-images { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .comparison-layout { grid-template-columns: 1fr; }
+      .comparison-panel { position: static; padding-top: 0; }
+      .comparison-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .layout { width: min(100% - 24px, var(--max-width)); }
+      header { padding-top: 24px; }
+      .trajectory-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pair-grid { grid-template-columns: 1fr; }
+    }
+    @media print {
+      .report-figure, .pair-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="layout">
+      <div class="eyebrow">Wave 5 research report</div>
+      <h1>VLM-guided generation with Stable Diffusion 1.5</h1>
+      <p class="authors">Карачун Александр<sup>1</sup> &nbsp;&nbsp; Белецкий Илья<sup>2</sup></p>
+      <!-- <p class="affiliations"><sup>1</sup>[Организация] &nbsp;&nbsp; <sup>2</sup>[Организация]</p> -->
+    </div>
+  </header>
+
+  <main class="layout">
+    <section id="abstract">
+      <h2>Аннотация</h2>
+      <div class="abstract">
+        <p><strong>Цель работы.</strong> Повысить точность диффузионной генерации изображений по сложным промптам.</p>
+        <p><strong>Метод.</strong> VLM-guided diffusion generation. Диффузионная модель — Stable Diffusion 1.5, VLM loss вычисляется с помощью Qwen3-VL-2B-Instruct, независимая judge-модель — Qwen3-VL-32B-Instruct.</p>
+        <p><strong>Основной результат.</strong> Мы получили некоторые улучшения верности генерации, но идея требует доработки.</p>
+        <p class="code-link">
+          <!-- <strong>Github:</strong> -->
+          <a href="https://github.com/AlexKarachun/through_vlm_guidance_research" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" role="img" aria-label="GitHub"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.41-1.27.74-1.56-2.57-.29-5.27-1.29-5.27-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.16 1.18a10.95 10.95 0 0 1 5.76 0c2.19-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.75.11 3.04.74.8 1.19 1.83 1.19 3.08 0 4.4-2.71 5.38-5.29 5.67.42.36.79 1.06.79 2.14v3.18c0 .31.21.68.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg><span>AlexKarachun/through_vlm_guidance_research</span></a></p>
+      </div>
+    </section>
+
+    <section id="method">
+      <h2>1. Введение: метод, сетап, эксперименты, метрики</h2>
+      <h3>1.1. Метод</h3>
+      <p>В <a href="https://github.com/AlexKarachun/vlm_guidance_research">прошлых спринтах</a> мы уже разбирали общую идею VLM guided генерации, здесь напомним её в двух словах. Мы хотим подкрутить промежуточные латенты так, чтобы итоговая картинка лучше соответствовала промпту. Для этого показываем результат генерации VLM с вопросом о верности генерации, получаем вероятности токенов <i>p</i><sub>yes</sub> и <i>p</i><sub>no</sub> и считаем loss: ℒ<sub>VLM</sub> = softplus[−(<i>p</i><sub>yes</sub> − <i>p</i><sub>no</sub>)]. После этого делаем градиентный шаг по латенту <i>X</i><sub>t</sub>.</p>
+      <p>Отличие текущего варианта пайплайна от прошлой версии заключается в том, как именно мы получаем изображение для VLM. Раньше мы подавали в VLM оценку финального изображения, построенную по промежуточному латенту. Теперь же из латента <i>X</i><sub>t</sub> мы выполняем весь оставшийся denoise-проход, получаем полноценное изображение и протягиваем градиент назад через всю траекторию генерации. Мы решили попробовать такой пайплайн, поскольку прошлый алгоритм для самых важных ранних латентов опирался на слишком грубую оценку изображения, из-за чего VLM-сигнал получался неинформативным.</p>
+
+      <p>Шаг оптимизации латента имеет вид: <i>X</i>′<sub>t</sub> = <i>X</i><sub>t</sub> − η∇<sub><i>X</i><sub>t</sub></sub>ℒ<sub>VLM</sub>. После обновления мы ещё раз запускаем denoise из <i>X</i>′<sub>t</sub>. Чтобы сравнение было честным, во всех повторных генерациях используем тот же закэшированный DDPM noise. За счёт этого изменения в изображении связаны именно с guidance, а не с новыми случайными числами. Этот цикл оптимизации можно повторять несколько раз — мы так и делаем. Общая схема одной итерации показана на <a href="#fig-guided-pipeline">рис. 1</a>.</p>
+      
+    <figure class="report-figure" id="fig-guided-pipeline">
+      <div class="figure-frame"><img class="full-image pipeline-image" src="wave_5_report_assets/figures/guided_generation_pipeline.png?v=wave5-cfg11" alt="Схема VLM-guided генерации"></div>
+      <figcaption><strong>Рисунок 1.</strong> Схема VLM-guided генерации. Латент <i>X</i><sub>t</sub> обновляется по градиенту VLM loss, после чего изображение повторно генерируется с тем же закэшированным DDPM noise.</figcaption>
+    </figure>
+
+      <h3>1.2. Экспериментальный сетап</h3>
+      <p>Эксперименты проводились на первых 50 промптах из датасета <a href="https://github.com/PeterZs/SAP-/blob/main/benchmarks/original_prompts/Whoops.txt">Whoops</a>. В качестве генеративной модели мы использовали Stable Diffusion 1.5, а для вычисления дифференцируемого VLM loss — Qwen3-VL-2B-Instruct. И baseline-, и guided-генерация выполнялись за 50 шагов DDPM-расшумления. Полученные изображения независимо оценивались моделью Qwen3-VL-32B-Instruct по двум метрикам: alignment показывает соответствие изображения промпту, quality — визуальное качество изображения независимо от промпта. Обе оценки находятся в диапазоне от 1 до 5, и в обоих случаях большее значение лучше. Во всех экспериментах мы усредняли эти метрики по 50 генерациям, чтобы оценить исследуемое сочетание гиперпараметров.</p>
+      <p>В экспериментах для каждого guided-запуска мы выполняли четыре итерации guidance на одном и том же таймстепе. Это компромисс между достаточно заметным воздействием на латент и временем генерации. На каждом guidance-шаге наш алгоритм требует довести denoise до конца, вычислить VLM loss и протянуть градиент назад через VLM, декодер и всю траекторию генерации к оптимизируемому латенту. Чтобы такой backward помещался на GPU, мы использовали gradient checkpointing. В результате обычная SD1.5-генерация потребляла около 11 GB VRAM, guided SD1.5 — около 23 GB.</p>
+
+      <h3>1.3. Выбор baseline</h3>
+      <p>Мы заметили, что CFG scale довольно сильно влияет на целевую метрику alignment, поэтому для чистоты эксперимента подобрали оптимальный CFG scale для обычной SD1.5 (<a href="#fig-baseline-cfg">рис. 2</a>). Лучший результат получился при CFG = 13: средний alignment составил 3.76, а quality — 3.62. Этот запуск далее используется как baseline.</p>
+      
+    <figure class="report-figure" id="fig-baseline-cfg">
+      <div class="figure-frame"><div class="embedded-chart" data-chart-src="wave_5_report_charts/baseline_cfg.html" aria-label="Baseline CFG sweep" style="min-height:460px"></div></div>
+      <figcaption><strong>Рисунок 2.</strong> Зависимость среднего alignment стандартного SD1.5 от CFG scale. Звездой отмечена выбранная baseline-конфигурация.</figcaption>
+    </figure>
+
+    
+      <h3>1.4. Поиск лучшего alignment</h3>
+      <p>Для guided-генерации мы искали оптимальное сочетание трёх гиперпараметров: learning rate (&eta;), CFG scale и guidance step — номера латента для guidance в диапазоне от 0 до 50, где 0 соответствует чистому шуму, а 50 — расшумлённому латенту. Во всех случаях мы выполняли четыре guidance-итерации на одном и том же таймстепе. Полное пространство экспериментов показано на <a href="#fig-alignment-space">рис. 3</a>. Наилучший средний alignment, равный 3.84, достигается при lr = 2e-4, CFG scale = 11 и guidance step = 0. Средний quality этого запуска составляет 3.56. Далее мы будем подробно анализировать именно этот запуск как обладателя наиболее удачного сочетания гиперпараметров.</p>
+      
+    <figure class="report-figure" id="fig-alignment-space">
+      <div class="figure-frame"><iframe class="chart-frame" src="wave_5_report_charts/alignment_parameter_space.html" title="Alignment parameter space" style="height:700px" loading="lazy"></iframe></div>
+      <figcaption><strong>Рисунок 3.</strong> Средний alignment guided SD1.5 в пространстве learning rate, CFG scale, guidance step.</figcaption>
+    </figure>
+    
+      
+    
+      <h3>1.5. Распределение quality</h3>
+      <p>Для полноты исследования мы также оценивали quality — визуальную целостность сгенерированных изображений (<a href="#fig-quality-space">рис. 4</a>). Как видно, больший CFG scale в целом приводит к ухудшению визуальной целостности изображения. Такое же поведение наблюдается и без guidance: зависимость среднего quality стандартного SD1.5 от CFG scale показана на <a href="#fig-baseline-quality-cfg">рис. 5</a>. Мы считаем, что это связано с выходом генерации за знакомое диффузионной модели распределение латентов при увеличении CFG scale (distribution shift).</p>
+            
+    <figure class="report-figure" id="fig-quality-space">
+      <div class="figure-frame"><iframe class="chart-frame" src="wave_5_report_charts/quality_parameter_space.html" title="Quality parameter space" style="height:700px" loading="lazy"></iframe></div>
+      <figcaption><strong>Рисунок 4.</strong> Среднее quality guided SD1.5 в пространстве learning rate, CFG scale, guidance step.</figcaption>
+    </figure>
+
+
+      <figure class="report-figure" id="fig-baseline-quality-cfg">
+      <div class="figure-frame"><div class="embedded-chart" data-chart-src="wave_5_report_charts/baseline_quality_cfg.html" aria-label="SD1.5 quality by CFG" style="min-height:460px"></div></div>
+      <figcaption><strong>Рисунок 5.</strong> Зависимость среднего quality стандартного SD1.5 от CFG scale. Звездой отмечена baseline-конфигурация, выбранная по alignment.</figcaption>
+    </figure>
+
+    </section>
+
+    <section id="conclusions">
+      <h2>2. Наблюдения</h2>
+
+      <h3>2.1. Quality vs alignment trade-off</h3>
+      <p>Совместное распределение запусков по quality и alignment показано на <a href="#fig-quality-alignment">рис. 6</a>. В разумной области исследованных параметров рост alignment сопровождается снижением quality: улучшая соответствие промпту, мы, как правило, ухудшаем визуальную целостность изображения. Эта тенденция заметна и у vanilla SD1.5, и у guided-запусков.</p>
+
+    <figure class="report-figure" id="fig-quality-alignment">
+      <div class="figure-frame"><div class="embedded-chart" data-chart-src="wave_5_report_charts/quality_vs_alignment.html" aria-label="Quality vs alignment" style="min-height:620px"></div></div>
+      <figcaption><strong>Рисунок 6.</strong> Зависимость alignment от quality для всех исследованных запусков — как guided, так и vanilla. Цвет отображает CFG scale. Звёздами отмечены выбранные guided- и baseline-конфигурации.</figcaption>
+    </figure>
+
+      <h3>2.2. Корреляция VLM loss и alignment</h3>
+      <p>Связь среднего значения финального VLM loss с оценкой соответствия промпту показана на <a href="#fig-final-loss-alignment">рис. 7</a>. Между финальным loss и alignment наблюдается сильная обратная корреляция. Пайплайн с меньшим VLM loss в среднем получает более высокий alignment. Это значит, что выбранный loss информативен — он содержит полезный сигнал о соответствии изображения промпту.</p>
+
+    <figure class="report-figure" id="fig-final-loss-alignment">
+      <div class="figure-frame"><div class="embedded-chart" data-chart-src="wave_5_report_charts/final_loss_vs_alignment.html" aria-label="Final VLM loss vs alignment" style="min-height:650px"></div></div>
+      <figcaption><strong>Рисунок 7.</strong> Связь среднего финального VLM loss и alignment для всех исследованных guided-конфигураций. Каждая точка соответствует одному пайплайну; звёздочкой отмечена выбранная для подробного анализа конфигурация — лучшая по alignment.</figcaption>
+    </figure>
+
+      <h3>2.3. Зависимость alignment, quality и VLM loss от CFG scale</h3>
+      <p>На графике quality vs alignment (<a href="#fig-quality-alignment">рис. 6</a>) цвет точки кодирует CFG scale. Точки одного цвета группируются прежде всего по quality: при увеличении CFG среднее quality сильно снижается. Alignment тоже зависит от CFG, однако эта зависимость выражена слабее.</p>
+
+      <p>Зависимость среднего финального VLM loss от CFG scale показана на <a href="#fig-final-vlm-loss-by-cfg">рис. 8</a>. При увеличении CFG loss в целом снижается. Таким образом, CFG отрицательно коррелирует с quality и финальным VLM loss и положительно, но слабее, — с alignment.</p>
+
+    <figure class="report-figure" id="fig-final-vlm-loss-by-cfg">
+      <div class="figure-frame"><div class="embedded-chart" data-chart-src="wave_5_report_charts/final_vlm_loss_by_cfg.html" aria-label="Mean final VLM loss by CFG scale" style="min-height:460px"></div></div>
+      <figcaption><strong>Рисунок 8.</strong> Зависимость среднего финального VLM loss от CFG scale. Каждая точка показывает финальный loss, усреднённый по всем исследованным guided-пайплайнам с соответствующим CFG.</figcaption>
+    </figure>
+
+      <h3>2.4. VLM loss плохо оптимизируется</h3>
+
+      <p>На <a href="#fig-vlm-trajectories">рис. 9</a> видно, как меняется VLM loss во время итераций guidance для пайплайна с лучшим alignment. Loss в целом не оптимизируется, а осциллирует. Такая динамика не похожа на корректную оптимизацию целевой функции. Аналогичное поведение наблюдается и среди остальных конфигураций. На <a href="#fig-all-mean-vlm-trajectories">рис. 10</a> приведены средние траектории VLM loss по всем исследованным пайплайнам. Мы видим, что в среднем loss снижается, но незначительно. Поэтому текущий эксперимент не позволяет считать процедуру оптимизации надёжной.</p>
+
+      <p>Поскольку в разделе 2.2 мы уже выяснили, что наш loss информативен, нельзя утверждать, что проблема заключается именно в нём. Возможно, чтобы увидеть динамику оптимизации, нам не хватило четырёх итераций guidance; возможно, learning rate оказался слишком большим или при backward происходит взрыв градиентов. Нельзя исключать и то, что идея VLM-guided генерации в нашей реализации в принципе нежизнеспособна. Это мы проверим в следующем спринте.</p>
+      
+    <figure class="report-figure" id="fig-vlm-trajectories">
+      <div class="figure-frame"><div class="embedded-chart" data-chart-src="wave_5_report_charts/vlm_loss_trajectories.html" aria-label="VLM loss trajectories" style="min-height:650px"></div></div>
+      <figcaption><strong>Рисунок 9.</strong> Изменение VLM loss по итерациям guidance. Тонкие линии соответствуют отдельным промптам, жирная чёрная линия — среднему значению. Наведение курсора на траекторию показывает соответствующую последовательность изображений.</figcaption>
+    </figure>
+
+    <figure class="report-figure" id="fig-all-mean-vlm-trajectories">
+      <div class="figure-frame"><div class="embedded-chart" data-chart-src="wave_5_report_charts/all_mean_vlm_loss_trajectories.html" aria-label="Mean VLM loss trajectories for all guided pipelines" style="min-height:650px"></div></div>
+      <figcaption><strong>Рисунок 10.</strong> Средние траектории VLM loss для всех исследованных guided-конфигураций. Каждая линия усреднена по промптам одного пайплайна. Цвет кодирует CFG scale и показывает, насколько сильно траектория зависит от него. Выбранный лучший по alignment запуск показан тёмной пунктирной линией; чёрная сплошная линия показывает среднее значение по всем приведённым траекториям.</figcaption>
+    </figure>
+
+      <h3>2.5. Распределение alignment для каждого CFG scale</h3>
+      <p>Несмотря на то что наш guided-подход не показал устойчивой оптимизации VLM loss, для каждого из рассмотренных CFG scale мы смогли превзойти vanilla SD1.5, что продемонстрировано на <a href="#fig-baseline-guided-cfg">рис. 11</a>. Здесь vanilla SD1.5 сравнивается со всеми guided-конфигурациями отдельно для каждого CFG scale, и во всех случаях мы не хуже baseline. Возможно, дело в стохастичности alignment, а возможно, даже такой неустойчивый алгоритм смог немного повысить метрику. Однозначно сказать сложно.</p>
+
+    <figure class="report-figure" id="fig-baseline-guided-cfg">
+      <div class="figure-frame"><div class="embedded-chart" data-chart-src="wave_5_report_charts/baseline_vs_guided_cfg.html" aria-label="Baseline SD1.5 and guided alignment distribution by CFG" style="min-height:460px"></div></div>
+      <figcaption><strong>Рисунок 11.</strong> Средний alignment всех guided-конфигураций для каждого CFG scale в сравнении с vanilla SD1.5.</figcaption>
+    </figure>
+    
+    </section>
+
+    <section id="examples">
+      <h2>3. Примеры генераций</h2>
+      <p>Мы демонстрируем примеры генераций по 50 использованным промптам для лучшего guided и baseline пайплайнов и вместе с этим приводим относительный прирост alignment для guided пайплайна на <a href="#fig-alignment-delta">рис. 12</a>. Интерактивный график позволяет навести курсор на строку и сравнить изображения vanilla и guided для одного и того же prompt.</p>
+      
+    <figure class="report-figure" id="fig-alignment-delta">
+      <div class="figure-frame"><div class="embedded-chart" data-chart-src="wave_5_report_charts/alignment_delta.html" aria-label="Per-prompt alignment change" style="min-height:900px"></div></div>
+      <figcaption><strong>Рисунок 12.</strong> Относительный прирост alignment за счёт guided-генерации по сравнению с baseline для каждого из 50 используемых промптов. Наведите курсор на столбец, чтобы обновить baseline- и guided-изображения справа.</figcaption>
+    </figure>
+
+      
+    
+    </section>
+
+    <section id="summary">
+      <h2>4. Итог</h2>
+<!-- 
+В этой работе мы продемонстрировали quality/alignment tradeoff, обосновали информативность выбранного VLM loss и обнаружили корреляции quality, alignment и VLM loss с CFG scale. Кроме этого мы продемонстрировали плохую динамику оптимизации латентов нашим guided пайплайном и выдвинули гипотезы о причинах:
+1. нам не хватило 4 итераций гайденса
+2. у нас слишком большой lr
+3. при backward происходит взрыв градиентов
+4. идея vlm guided генерации в нашем исполнении в принципе не жизнеспособна
+
+Проверку первых трех гипотез мы возьмем на следующий спринт.
+
+В целом несмотря на слабые результаты мы вероятно смогли побить vanilla SD1.5 на всех рассмотренных CFG scale.
+-->
+  
+      <p>В этой работе мы продемонстрировали trade-off между quality и alignment, показали информативность выбранного VLM loss и обнаружили связь quality, alignment и финального VLM loss с CFG scale.</p>
+
+      <p>В то же время динамика оптимизации латентов в guided-пайплайне оказалась неудовлетворительной. VLM loss снижается слабо и немонотонно, траектории осциллируют. Мы рассматриваем четыре возможные причины:</p>
+      <ol>
+        <li>Для оптимизации недостаточно четырёх guidance-итераций.</li>
+        <li>Learning rate оказался слишком большим.</li>
+        <li>При backward через траекторию генерации происходит взрыв градиентов.</li>
+        <li>VLM-guided генерация в нашей реализации в принципе нежизнеспособна.</li>
+      </ol>
+      <p>Первые три гипотезы мы проверим в следующем спринте: увеличим число итераций, уменьшим learning rate и отдельно проследим за градиентами.</p>
+      <p>Несмотря на слабую динамику оптимизации, для каждого рассмотренного CFG scale мы нашли guided-конфигурации с alignment не ниже, чем у vanilla SD1.5. В целом нам удалось получить некоторое улучшение верности генерации, однако идея пока не раскрылась полностью и требует дальнейшей доработки.</p>
+    </section>
+
+<!--
+
+
+
+
+
+
+
+В разумной области исследованных параметров рост alignment сопровождается снижением quality
+
+выбранный loss информативен - содержит полезный сигнал о соответствии изображения промпту
+
+CFG отрицательно коррелирует с quality и финальный VLM loss, и положительно, но слабее, с alignment
+
+
+<p>Поскольку в разделе 2.2 мы уже выяснили, что наш лосс информативен, мы не можем утверждать что проблема в нем. Возможно, чтобы увидеть динамику оптимизации, нам не хватило 4 итераций гайденса, или у нас слишком большой lr, или при backward происходит взрыв градиентов, а возможно идея vlm guided генерации в нашем исполнении в принципе не жизнеспособна. Это мы проверим в следующем спринте.</p>
+
+vanilla SD1.5 сравнивается со всеми guided-конфигурациями отдельно для каждого CFG scale и везде мы не хуже бейзлайна. Возможно дело в стохастичности alignment, а возможно даже такой не жизнеспособный алгоритм смог приподнять метрику. Однозначно сказать сложно.
+
+
+
+
+
+
+
+главы:
+- intro в тему, сетап, метрики
+  - метод
+  - эксперементальный сетап
+  - выбор бейзлайна
+  - поиск лучшего alignment
+  - распределение alignmen и quality на 3d графиках
+- секции по выводам
+  - quality vs alignment traidoff (🔁fig-quality-alignment)
+  - лосс коррелирует с alignment (fig-final-loss-alignment)
+  - quality и vlm loss сильнее всего зависят от cfg, но не alignment (🔁fig-all-mean-vlm-trajectories, 🔁fig-quality-alignment)
+  - метрика плохо оптимизируется (fig-vlm-trajectories, 🔁fig-all-mean-vlm-trajectories)
+  - для каждого сfg scale повысили alignment ()
+- Примеры (fig-alignment-delta)
+
+
+Итог + повторить выводы:  Мы получили некоторые улучшения верности генерации, но идея не раскрылась и требует доработки.
+
+План:
+- запустить экспы на слишком много итераций гайденса 
+  - возмжоно для маленьких lr vlm_loss не будет так осцилировать
+  - возможно мы просто не дождались сходевича (4 итерации - мало)
+  
+
+
+выводы
+- метрика плохо оптимизируется - не монотонно и слабо. надо провести эксперименты с малым lr и большим количеством шагов, возможно мы делаем слишком большие шаги или не дождались сходимости или у нас взрыв градиентов
+- наш лосс не бесполезен, он коррелирует с alignment (это видно на графике). то есть лосс информативный
+- для осмысленных гиперпараметров guided генерации наблюдается quality vs alignment traidoff - его видно на графике quality vs alignment
+- для каждого сfg scale мы смогли повысить alignment - видно на графике
+- quality и vlm loss сильнее всего зависят от cfg, а alignmen слабо
+
+
+
+
+-->
+
+  </main>
+
+  <footer><div class="layout footer-content">
+    <a class="telegram-link" href="https://t.me/Alex_Karachun" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" role="img" aria-label="Telegram"><path d="M23.91 3.79 20.3 20.84c-.27 1.2-.98 1.49-1.99.93l-5.5-4.05-2.65 2.55c-.29.29-.54.54-1.11.54l.39-5.6L19.65 6c.45-.4-.1-.62-.7-.22L6.33 13.73.9 12.03c-1.18-.37-1.2-1.18.25-1.75L22.4 2.09c.98-.36 1.84.22 1.51 1.7Z"/></svg>
+      <span>t.me/Alex_Karachun</span>
+    </a>
+    <span>При создании графиков использовалась LLM.</span>
+  </div></footer>
+  <script src="wave_5_report_assets/js/plotly.min.js"></script>
+  <script>
+    async function loadEmbeddedChart(container) {
+      const source = container.dataset.chartSrc;
+      try {
+        const response = await fetch(source);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const chartDocument = new DOMParser().parseFromString(
+          await response.text(),
+          "text/html"
+        );
+        const scripts = Array.from(chartDocument.body.querySelectorAll("script"))
+          .map(script => ({ src: script.getAttribute("src"), code: script.textContent }));
+        chartDocument.body.querySelectorAll("script").forEach(script => script.remove());
+        container.replaceChildren(
+          ...Array.from(chartDocument.body.childNodes).map(node =>
+            document.importNode(node, true)
+          )
+        );
+        for (const scriptData of scripts) {
+          if (scriptData.src || scriptData.code.includes("wave-1-report-scroll")) continue;
+          const script = document.createElement("script");
+          script.textContent = scriptData.code;
+          container.appendChild(script);
+        }
+      } catch (error) {
+        container.innerHTML =
+          `<div class="embedded-chart-error">Не удалось загрузить график: ${source}</div>`;
+        console.error(`Failed to load chart ${source}`, error);
+      }
+    }
+
+    document.querySelectorAll(".embedded-chart[data-chart-src]")
+      .forEach(container => loadEmbeddedChart(container));
+  </script>
+</body>
+</html>

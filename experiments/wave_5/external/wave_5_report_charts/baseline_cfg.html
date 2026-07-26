@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../">
+  <title>Baseline CFG sweep</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #fbfcfe; color: #111; }
+    body { font-family: "Times New Roman", Times, serif; }
+    .plotly-graph-div { width: 100% !important; min-height: 590px; }
+    .baseline-cfg-chart .plotly-graph-div { min-height: 390px; }
+    .baseline-quality-cfg-chart .plotly-graph-div { min-height: 390px; }
+    .baseline-vs-guided-cfg-chart .plotly-graph-div { min-height: 390px; }
+    .final-vlm-loss-by-cfg-chart .plotly-graph-div { min-height: 390px; }
+    .hover-info-bar {
+      min-height: 44px;
+      padding: 6px 75px 2px;
+      color: #334155;
+      font-size: 14px;
+      line-height: 1.3;
+    }
+    .baseline-cfg-chart .hover-info-layout .plotly-graph-div,
+    .baseline-quality-cfg-chart .hover-info-layout .plotly-graph-div,
+    .baseline-vs-guided-cfg-chart .hover-info-layout .plotly-graph-div,
+    .final-vlm-loss-by-cfg-chart .hover-info-layout .plotly-graph-div {
+      min-height: 390px;
+    }
+    .trajectory-layout { display: block; }
+    .trajectory-plot .plotly-graph-div { min-height: 350px; }
+    .trajectory-panel { padding-top: 8px; font-size: .78rem; line-height: 1.25; }
+    .trajectory-panel > strong {
+      display: block; margin-bottom: 8px; overflow-wrap: anywhere;
+    }
+    .trajectory-images {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .trajectory-images figure, .comparison-images figure { margin: 0; min-width: 0; }
+    .trajectory-images img, .comparison-images img {
+      display: block; width: 100%; aspect-ratio: 1; object-fit: cover;
+    }
+    .trajectory-images figcaption, .comparison-images figcaption {
+      margin-top: 3px; font-size: .78rem; line-height: 1.2; text-align: left;
+    }
+    .comparison-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 18px;
+      align-items: start;
+    }
+    .comparison-panel { position: sticky; top: 12px; padding-top: 22px; }
+    .comparison-panel-heading {
+      min-height: 92px; margin-bottom: 10px; font-size: .88rem; line-height: 1.25;
+    }
+    .comparison-panel-heading strong {
+      display: block; margin-bottom: 7px; font-size: 1rem;
+    }
+    .comparison-images { display: grid; gap: 15px; }
+    .comparison-image-label {
+      margin-bottom: 5px;
+      padding: 5px 8px;
+      border-left: 4px solid #8a94a3;
+      background: #f2f3f5;
+      color: #273142;
+      font: 700 .76rem/1.2 Arial, sans-serif;
+      letter-spacing: .045em;
+    }
+    .guided-example .comparison-image-label {
+      border-left-color: #2f78d0; background: #edf5ff; color: #174f91;
+    }
+    @media (max-width: 850px) {
+      .comparison-layout { grid-template-columns: 1fr; }
+      .comparison-panel { position: static; padding-top: 0; }
+      .comparison-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .trajectory-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body class="baseline-cfg-chart">
+    <div class="hover-info-layout">
+      <div class="hover-info-bar" id="baseline-cfg-info">Наведите курсор на точку, чтобы увидеть подробности.</div>
+      <div style="height:100%; width:100%;">                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="wave_5_report_assets/js/plotly.min.js"></script>                <div id="baseline-cfg-plot" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("baseline-cfg-plot")) {                    Plotly.newPlot(                        "baseline-cfg-plot",                        [{"customdata":[["multi_prompt_sd15-whoops50-cfg1",0.7899883750113424,2.84,50],["multi_prompt_sd15-whoops50-cfg3",1.3138197931906765,3.82,50],["multi_prompt_sd15-whoops50-cfg5",1.357669070916197,3.9,50],["multi_prompt_sd15-whoops50-cfg7",1.338442591756767,3.9,50],["multi_prompt_sd15-whoops50-cfg9",1.3584204512775049,3.92,50],["multi_prompt_sd15-whoops50-cfg11",1.3792929274058636,3.64,50],["multi_prompt_sd15-whoops50-cfg13",1.3636685215750541,3.62,50],["multi_prompt_sd15-whoops50-cfg15",1.3334013588089182,3.42,50],["multi_prompt_sd15-whoops50-cfg17",1.2295677023628582,3.28,50],["multi_prompt_sd15-whoops50-cfg19",1.3618714614643412,3.02,50],["multi_prompt_sd15-whoops50-cfg21",1.3130428906372638,3.02,50]],"legendgroup":"","line":{"color":"#3569b0","dash":"solid","width":3},"marker":{"symbol":"circle","color":"#3569b0","size":8},"mode":"lines+markers","name":"Baseline SD1.5","orientation":"v","showlegend":true,"x":{"dtype":"f8","bdata":"AAAAAAAA8D8AAAAAAAAIQAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQAAAAAAAACZAAAAAAAAAKkAAAAAAAAAuQAAAAAAAADFAAAAAAAAAM0AAAAAAAAA1QA=="},"xaxis":"x","y":{"dtype":"f8","bdata":"w\u002fUoXI\u002fCAUDD9Shcj8IJQIXrUbgehQtA9ihcj8L1DEBSuB6F61EMQEjhehSuRw1AFK5H4XoUDkAUrkfhehQOQMP1KFyPwg1AcT0K16NwDUApXI\u002fC9SgMQA=="},"yaxis":"y","type":"scatter","hoverinfo":"none"},{"customdata":[["multi_prompt_sd15-whoops50-cfg13",1.3636685215750541,3.62,50]],"marker":{"color":"#ffd166","size":16,"symbol":"star"},"mode":"markers","name":"Selected baseline","x":[13.0],"y":[3.76],"type":"scatter","hoverinfo":"none"}],                        {"template":{"layout":{"coloraxis":{"colorbar":{"tickfont":{"color":"#334155"}}},"font":{"color":"#222222","family":"Times New Roman, Times, serif","size":14},"hoverlabel":{"bgcolor":"#ffffff","font":{"color":"#172033"}},"paper_bgcolor":"#fbfcfe","plot_bgcolor":"#fbfcfe","scene":{"bgcolor":"#fbfcfe","xaxis":{"backgroundcolor":"#fbfcfe","gridcolor":"#dfe4ec"},"yaxis":{"backgroundcolor":"#fbfcfe","gridcolor":"#dfe4ec"},"zaxis":{"backgroundcolor":"#fbfcfe","gridcolor":"#dfe4ec"}},"title":{"font":{"color":"#111111","size":17}},"xaxis":{"gridcolor":"#e5e9f0","linecolor":"#cbd3df","zerolinecolor":"#cbd3df"},"yaxis":{"gridcolor":"#e5e9f0","linecolor":"#cbd3df","zerolinecolor":"#cbd3df"}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"CFG scale"},"fixedrange":true,"tickmode":"array","tickvals":[1.0,3.0,5.0,7.0,9.0,11.0,13.0,15.0,17.0,19.0,21.0],"ticktext":["1","3","5","7","9","11","13","15","17","19","21"],"range":[0.19999999999999996,21.8]},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"Mean alignment"},"fixedrange":true},"legend":{"tracegroupgap":0,"orientation":"h","x":0.5,"xanchor":"center","y":1.12,"yanchor":"bottom"},"title":{},"margin":{"l":55,"r":35,"t":70,"b":55}},                        {"responsive": true, "displaylogo": false, "scrollZoom": false, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}                    )                };            </script>        </div>
+    </div>
+    <script>
+      (() => {
+        const plot = document.getElementById("baseline-cfg-plot");
+        const info = document.getElementById("baseline-cfg-info");
+        const initialText = "Наведите курсор на точку, чтобы увидеть подробности.";
+        let resetTimer = null;
+
+        const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+        })[character]);
+        const fixed = (value, digits = 2) =>
+          Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : "—";
+        const scientific = value =>
+          Number.isFinite(Number(value)) ? Number(value).toExponential(1) : "—";
+        const markerValue = point => {
+          const color = point.data && point.data.marker && point.data.marker.color;
+          return Array.isArray(color) || ArrayBuffer.isView(color)
+            ? color[point.pointNumber]
+            : color;
+        };
+        const formatPoint = point => {
+          const data = point.customdata || [];
+          return `CFG = ${fixed(point.x, 0)}, mean alignment = ${fixed(point.y)}, ` +
+            `mean quality = ${fixed(data[2])}`;
+        };
+
+        plot.on("plotly_hover", event => {
+          if (resetTimer !== null) {
+            clearTimeout(resetTimer);
+            resetTimer = null;
+          }
+          const point = event.points && event.points[0];
+          if (point) info.innerHTML = formatPoint(point);
+        });
+        plot.on("plotly_unhover", () => {
+          if (resetTimer !== null) clearTimeout(resetTimer);
+          resetTimer = setTimeout(() => {
+            resetTimer = null;
+            info.textContent = initialText;
+          }, 140);
+        });
+      })();
+    </script>
+    
+<script>
+  window.addEventListener("wheel", event => {
+    if (window.parent === window) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const deltaUnit = event.deltaMode === 1
+      ? 16
+      : event.deltaMode === 2
+      ? window.innerHeight
+      : 1;
+    const sensitivity = 1.8;
+    window.parent.postMessage({
+      type: "wave-1-report-scroll",
+      deltaX: event.deltaX * deltaUnit * sensitivity,
+      deltaY: event.deltaY * deltaUnit * sensitivity
+    }, "*");
+  }, { capture: true, passive: false });
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../">
+  <title>Alignment parameter space</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #fbfcfe; color: #111; }
+    body { font-family: "Times New Roman", Times, serif; }
+    .plotly-graph-div { width: 100% !important; min-height: 590px; }
+    .baseline-cfg-chart .plotly-graph-div { min-height: 390px; }
+    .baseline-quality-cfg-chart .plotly-graph-div { min-height: 390px; }
+    .baseline-vs-guided-cfg-chart .plotly-graph-div { min-height: 390px; }
+    .final-vlm-loss-by-cfg-chart .plotly-graph-div { min-height: 390px; }
+    .hover-info-bar {
+      min-height: 44px;
+      padding: 6px 75px 2px;
+      color: #334155;
+      font-size: 14px;
+      line-height: 1.3;
+    }
+    .baseline-cfg-chart .hover-info-layout .plotly-graph-div,
+    .baseline-quality-cfg-chart .hover-info-layout .plotly-graph-div,
+    .baseline-vs-guided-cfg-chart .hover-info-layout .plotly-graph-div,
+    .final-vlm-loss-by-cfg-chart .hover-info-layout .plotly-graph-div {
+      min-height: 390px;
+    }
+    .trajectory-layout { display: block; }
+    .trajectory-plot .plotly-graph-div { min-height: 350px; }
+    .trajectory-panel { padding-top: 8px; font-size: .78rem; line-height: 1.25; }
+    .trajectory-panel > strong {
+      display: block; margin-bottom: 8px; overflow-wrap: anywhere;
+    }
+    .trajectory-images {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .trajectory-images figure, .comparison-images figure { margin: 0; min-width: 0; }
+    .trajectory-images img, .comparison-images img {
+      display: block; width: 100%; aspect-ratio: 1; object-fit: cover;
+    }
+    .trajectory-images figcaption, .comparison-images figcaption {
+      margin-top: 3px; font-size: .78rem; line-height: 1.2; text-align: left;
+    }
+    .comparison-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 18px;
+      align-items: start;
+    }
+    .comparison-panel { position: sticky; top: 12px; padding-top: 22px; }
+    .comparison-panel-heading {
+      min-height: 92px; margin-bottom: 10px; font-size: .88rem; line-height: 1.25;
+    }
+    .comparison-panel-heading strong {
+      display: block; margin-bottom: 7px; font-size: 1rem;
+    }
+    .comparison-images { display: grid; gap: 15px; }
+    .comparison-image-label {
+      margin-bottom: 5px;
+      padding: 5px 8px;
+      border-left: 4px solid #8a94a3;
+      background: #f2f3f5;
+      color: #273142;
+      font: 700 .76rem/1.2 Arial, sans-serif;
+      letter-spacing: .045em;
+    }
+    .guided-example .comparison-image-label {
+      border-left-color: #2f78d0; background: #edf5ff; color: #174f91;
+    }
+    @media (max-width: 850px) {
+      .comparison-layout { grid-template-columns: 1fr; }
+      .comparison-panel { position: static; padding-top: 0; }
+      .comparison-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .trajectory-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body class="alignment-parameter-space-chart">
+    <div class="hover-info-layout">
+      <div class="hover-info-bar" id="alignment-parameter-space-info">Наведите курсор на точку, чтобы увидеть подробности.</div>
+      <div style="height:100%; width:100%;">                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="wave_5_report_assets/js/plotly.min.js"></script>                <div id="alignment-parameter-space-plot" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("alignment-parameter-space-plot")) {                    Plotly.newPlot(                        "alignment-parameter-space-plot",                        [{"customdata":{"dtype":"f8","bdata":"w\u002fUoXI\u002fCDUAK16NwPQoLQM3MzMzMzAxAhetRuB6FC0D2KFyPwvUAQArXo3A9CgdAexSuR+F6DEBSuB6F61EQQB+F61G4Hg1ArkfhehSuD0B7FK5H4XoMQMP1KFyPwg1Aj8L1KFyPDkAzMzMzMzMLQJqZmZmZmQ1AcT0K16NwCUBmZmZmZmYCQD0K16NwPQZArkfhehSuC0ApXI\u002fC9SgQQEjhehSuRw1AXI\u002fC9ShcD0CkcD0K16MMQGZmZmZmZg5AuB6F61G4DkB7FK5H4XoMQK5H4XoUrgtA7FG4HoXrCUCPwvUoXI8CQLgehetRuAZAzczMzMzMDEDXo3A9CtcPQDMzMzMzMwtACtejcD0KD0DNzMzMzMwMQDMzMzMzMw9AFK5H4XoUDkD2KFyPwvUMQEjhehSuRw1A16NwPQrXC0AfhetRuB4NQJqZmZmZmQlA4XoUrkfhAkDXo3A9CtcHQFK4HoXrUQxA7FG4HoXrDUB7FK5H4XoMQArXo3A9Cg9AKVyPwvUoDEDhehSuR+EOQM3MzMzMzAxAzczMzMzMDEDhehSuR+EKQDMzMzMzMwtACtejcD0KC0D2KFyPwvUIQK5H4XoUrgtASOF6FK5HDUBmZmZmZmYKQHsUrkfhegxAuB6F61G4CkB7FK5H4XoMQFyPwvUoXAtAmpmZmZmZCUCkcD0K16MAQFK4HoXrUQhAZmZmZmZmCkC4HoXrUbgKQK5H4XoUrgtA16NwPQrXC0BI4XoUrkcJQBSuR+F6FApAAAAAAAAACECPwvUoXI8GQHE9CtejcA1AUrgehetRDECamZmZmZkNQFyPwvUoXAtASOF6FK5HDUDD9Shcj8IJQEjhehSuRw1AKVyPwvUoDEBI4XoUrkcNQFyPwvUoXAtAmpmZmZmZDUDD9Shcj8IJQOxRuB6F6w1AexSuR+F6DEDsUbgehesNQFyPwvUoXAtAmpmZmZmZDUAUrkfhehQKQDMzMzMzMwtA16NwPQrXD0ApXI\u002fC9SgMQDMzMzMzMw9AAAAAAAAADEA9CtejcD0OQFK4HoXrUQxAzczMzMzMDEDNzMzMzMwMQLgehetRuApAKVyPwvUoDEAAAAAAAAAQQAAAAAAAAAxAhetRuB6FD0BSuB6F61EMQOxRuB6F6w1AcT0K16NwDUBI4XoUrkcNQMP1KFyPwg1ACtejcD0KC0BxPQrXo3ANQD0K16NwPQpA7FG4HoXrDUCamZmZmZkJQNejcD0K1wtAMzMzMzMzD0AAAAAAAAAMQBSuR+F6FA5A9ihcj8L1DED2KFyPwvUMQHE9CtejcA1ACtejcD0KC0CamZmZmZkNQGZmZmZmZgpAexSuR+F6DEApXI\u002fC9SgIQClcj8L1KAxAcT0K16NwDUBxPQrXo3ANQFK4HoXrUQxAexSuR+F6DEA9CtejcD0KQHsUrkfhegxAKVyPwvUoCEBI4XoUrkcNQOF6FK5H4QpA7FG4HoXrDUAfhetRuB4JQFK4HoXrUQxAUrgehetRCEBxPQrXo3ANQHsUrkfhegxAw\u002fUoXI\u002fCDUDhehSuR+EKQJqZmZmZmQ1A9ihcj8L1DEDD9Shcj8INQArXo3A9CgtAPQrXo3A9DkB7FK5H4XoMQHE9CtejcA1APQrXo3A9CkCamZmZmZkNQMP1KFyPwglA4XoUrkfhCkBmZmZmZmYOQIXrUbgehQtAMzMzMzMzD0B7FK5H4XoMQLgehetRuA5AAAAAAAAADEA9CtejcD0OQMP1KFyPwg1A9ihcj8L1DEAUrkfhehQOQGZmZmZmZgpAFK5H4XoUDkBxPQrXo3AJQBSuR+F6FAJAKVyPwvUoCEDhehSuR+EKQArXo3A9Cg9ArkfhehSuC0DXo3A9CtcPQB+F61G4Hg1AXI\u002fC9ShcD0BSuB6F61EMQK5H4XoUrg9AFK5H4XoUDkAfhetRuB4NQB+F61G4Hg1A4XoUrkfhCkA9CtejcD0OQHE9CtejcAlAMzMzMzMzC0BmZmZmZmYOQDMzMzMzMwtAAAAAAAAAEEDNzMzMzMwMQDMzMzMzMw9AKVyPwvUoDECPwvUoXI8OQB+F61G4Hg1A4XoUrkfhCkDD9Shcj8INQMP1KFyPwglACtejcD0KA0AAAAAAAAAIQLgehetRuApAhetRuB6FD0DXo3A9CtcLQFyPwvUoXA9ASOF6FK5HDUCF61G4HoUPQAAAAAAAAAxA4XoUrkfhDkBxPQrXo3ANQFK4HoXrUQxAw\u002fUoXI\u002fCDUAK16NwPQoLQJqZmZmZmQ1ApHA9CtejDEDD9Shcj8INQOF6FK5H4QpAFK5H4XoUDkAzMzMzMzMLQHE9CtejcA1Aw\u002fUoXI\u002fCCUBI4XoUrkcNQKRwPQrXowxA7FG4HoXrDUAK16NwPQoLQOxRuB6F6w1AmpmZmZmZCUBxPQrXo3ANQHsUrkfhegxA7FG4HoXrDUAK16NwPQoLQMP1KFyPwg1AcT0K16NwCUDsUbgehesNQM3MzMzMzAxAFK5H4XoUDkDhehSuR+EKQEjhehSuRw1AmpmZmZmZCUAfhetRuB4NQFK4HoXrUQxAmpmZmZmZDUBSuB6F61EMQHE9CtejcA1ACtejcD0KC0BxPQrXo3ANQBSuR+F6FApAH4XrUbgeDUBSuB6F61EIQPYoXI\u002fC9QxA16NwPQrXB0BI4XoUrkcNQKRwPQrXowxAmpmZmZmZDUDhehSuR+EKQJqZmZmZmQ1AFK5H4XoUCkD2KFyPwvUMQAAAAAAAAAhA9ihcj8L1DEDXo3A9CtcHQHE9CtejcA1AUrgehetRDEDD9Shcj8INQDMzMzMzMwtAFK5H4XoUDkAUrkfhehQKQHE9CtejcA1AexSuR+F6CEBxPQrXo3ANQClcj8L1KAhAFK5H4XoUCkCPwvUoXI8OQDMzMzMzMwtArkfhehSuD0BI4XoUrkcNQDMzMzMzMw9AAAAAAAAADEAzMzMzMzMPQHE9CtejcA1AexSuR+F6DECamZmZmZkNQI\u002fC9ShcjwpAcT0K16NwDUAUrkfhehQKQB+F61G4Hg1AexSuR+F6CED2KFyPwvUMQIXrUbgehQdAmpmZmZmZAUCPwvUoXI8GQOxRuB6F6wlAFK5H4XoUDkDhehSuR+EKQDMzMzMzMw9AH4XrUbgeDUDXo3A9CtcPQAAAAAAAAAxAuB6F61G4DkBxPQrXo3ANQM3MzMzMzAxAmpmZmZmZDUCPwvUoXI8KQMP1KFyPwg1A7FG4HoXrCUD2KFyPwvUMQClcj8L1KAhA9ihcj8L1DEDXo3A9CtcHQGZmZmZmZgpAhetRuB6FD0CuR+F6FK4LQIXrUbgehQ9A9ihcj8L1DEAzMzMzMzMPQClcj8L1KAxAMzMzMzMzD0DD9Shcj8INQClcj8L1KAxA7FG4HoXrDUAzMzMzMzMLQJqZmZmZmQ1A7FG4HoXrCUBI4XoUrkcNQFK4HoXrUQhA9ihcj8L1DEDXo3A9CtcHQD0K16NwPQJAPQrXo3A9BkA9CtejcD0KQBSuR+F6FA5A16NwPQrXC0CF61G4HoUPQPYoXI\u002fC9QxArkfhehSuD0ApXI\u002fC9SgMQGZmZmZmZg5AcT0K16NwDUB7FK5H4XoMQOxRuB6F6w1A4XoUrkfhCkDsUbgehesNQEjhehSuRwlAmpmZmZmZDUCkcD0K16MIQPYoXI\u002fC9QxAMzMzMzMzB0Bcj8L1KFwLQIXrUbgehQ9AH4XrUbgeDUBcj8L1KFwPQClcj8L1KAxACtejcD0KD0CF61G4HoULQDMzMzMzMw9ASOF6FK5HDUCuR+F6FK4PQK5H4XoUrgtAMzMzMzMzD0CF61G4HoULQFyPwvUoXA9AH4XrUbgeDUCF61G4HoUPQAAAAAAAAAxA4XoUrkfhDkBcj8L1KFwLQDMzMzMzMw9AH4XrUbgeDUDhehSuR+EOQAAAAAAAAAxACtejcD0KD0A=","shape":"185, 2"},"legendgroup":"","marker":{"color":{"dtype":"f8","bdata":"w\u002fUoXI\u002fCDUDNzMzMzMwMQPYoXI\u002fC9QBAexSuR+F6DEAfhetRuB4NQHsUrkfhegxAj8L1KFyPDkCamZmZmZkNQGZmZmZmZgJArkfhehSuC0BI4XoUrkcNQKRwPQrXowxAuB6F61G4DkCuR+F6FK4LQI\u002fC9ShcjwJAzczMzMzMDEAzMzMzMzMLQM3MzMzMzAxAFK5H4XoUDkBI4XoUrkcNQB+F61G4Hg1A4XoUrkfhAkBSuB6F61EMQHsUrkfhegxAKVyPwvUoDEDNzMzMzMwMQOF6FK5H4QpACtejcD0KC0CuR+F6FK4LQGZmZmZmZgpAuB6F61G4CkBcj8L1KFwLQKRwPQrXowBAZmZmZmZmCkCuR+F6FK4LQEjhehSuRwlAAAAAAAAACEBxPQrXo3ANQJqZmZmZmQ1ASOF6FK5HDUBI4XoUrkcNQEjhehSuRw1AmpmZmZmZDUDsUbgehesNQOxRuB6F6w1AmpmZmZmZDUAzMzMzMzMLQClcj8L1KAxAAAAAAAAADEBSuB6F61EMQM3MzMzMzAxAKVyPwvUoDEAAAAAAAAAMQFK4HoXrUQxAcT0K16NwDUDD9Shcj8INQHE9CtejcA1A7FG4HoXrDUDXo3A9CtcLQAAAAAAAAAxA9ihcj8L1DEBxPQrXo3ANQJqZmZmZmQ1AexSuR+F6DEApXI\u002fC9SgMQHE9CtejcA1AexSuR+F6DEB7FK5H4XoMQEjhehSuRw1A7FG4HoXrDUBSuB6F61EMQHE9CtejcA1Aw\u002fUoXI\u002fCDUCamZmZmZkNQMP1KFyPwg1APQrXo3A9DkBxPQrXo3ANQJqZmZmZmQ1A4XoUrkfhCkCF61G4HoULQHsUrkfhegxAAAAAAAAADEDD9Shcj8INQBSuR+F6FA5AFK5H4XoUDkAUrkfhehQCQOF6FK5H4QpArkfhehSuC0AfhetRuB4NQFK4HoXrUQxAFK5H4XoUDkAfhetRuB4NQD0K16NwPQ5AMzMzMzMzC0AzMzMzMzMLQM3MzMzMzAxAKVyPwvUoDEAfhetRuB4NQMP1KFyPwg1ACtejcD0KA0C4HoXrUbgKQNejcD0K1wtASOF6FK5HDUAAAAAAAAAMQHE9CtejcA1Aw\u002fUoXI\u002fCDUCamZmZmZkNQMP1KFyPwg1AFK5H4XoUDkBxPQrXo3ANQEjhehSuRw1A7FG4HoXrDUDsUbgehesNQHE9CtejcA1A7FG4HoXrDUDD9Shcj8INQOxRuB6F6w1AFK5H4XoUDkBI4XoUrkcNQB+F61G4Hg1AmpmZmZmZDUBxPQrXo3ANQHE9CtejcA1AH4XrUbgeDUD2KFyPwvUMQEjhehSuRw1AmpmZmZmZDUCamZmZmZkNQPYoXI\u002fC9QxA9ihcj8L1DEBxPQrXo3ANQMP1KFyPwg1AFK5H4XoUDkBxPQrXo3ANQHE9CtejcA1AFK5H4XoUCkAzMzMzMzMLQEjhehSuRw1AAAAAAAAADEBxPQrXo3ANQJqZmZmZmQ1AcT0K16NwDUAfhetRuB4NQPYoXI\u002fC9QxAmpmZmZmZAUDsUbgehesJQOF6FK5H4QpAH4XrUbgeDUAAAAAAAAAMQHE9CtejcA1AmpmZmZmZDUDD9Shcj8INQPYoXI\u002fC9QxA9ihcj8L1DEBmZmZmZmYKQK5H4XoUrgtA9ihcj8L1DEApXI\u002fC9SgMQMP1KFyPwg1A7FG4HoXrDUCamZmZmZkNQEjhehSuRw1A9ihcj8L1DEA9CtejcD0CQD0K16NwPQpA16NwPQrXC0D2KFyPwvUMQClcj8L1KAxAcT0K16NwDUDsUbgehesNQOxRuB6F6w1AmpmZmZmZDUD2KFyPwvUMQFyPwvUoXAtAH4XrUbgeDUApXI\u002fC9SgMQIXrUbgehQtASOF6FK5HDUCuR+F6FK4LQIXrUbgehQtAH4XrUbgeDUAAAAAAAAAMQFyPwvUoXAtAH4XrUbgeDUAAAAAAAAAMQA=="},"coloraxis":"coloraxis","size":{"dtype":"i1","bdata":"MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjI="},"sizemode":"area","sizeref":0.125,"symbol":"circle","opacity":1.0},"mode":"markers","name":"","scene":"scene","showlegend":false,"x":{"dtype":"f8","bdata":"8WjjiLX4BD\u002fxaOOItfgEPy1DHOviNho\u002fLUMc6+I2Gj8tQxzr4jYaPy1DHOviNho\u002fLUMc6+I2Gj8tQxzr4jYaPy1DHOviNio\u002fLUMc6+I2Kj8tQxzr4jYqPy1DHOviNio\u002fLUMc6+I2Kj8tQxzr4jYqPy1DHOviNjo\u002fLUMc6+I2Oj8tQxzr4jY6Py1DHOviNjo\u002fLUMc6+I2Oj8tQxzr4jY6Py1DHOviNjo\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJwP\u002fyp8dJNYnA\u002f\u002fKnx0k1icD\u002f8qfHSTWJwP3sUrkfheoQ\u002fexSuR+F6hD97FK5H4XqEP3sUrkfheoQ\u002fexSuR+F6hD\u002fxaOOItfjkPvFo44i1+OQ+8WjjiLX45D7xaOOItfj0PvFo44i1+PQ+8WjjiLX49D7xaOOItfgEP\u002fFo44i1+AQ\u002f8WjjiLX4BD8tQxzr4jYaPy1DHOviNho\u002fLUMc6+I2Gj8tQxzr4jYaPy1DHOviNho\u002fLUMc6+I2Kj8tQxzr4jYqPy1DHOviNio\u002fLUMc6+I2Kj8tQxzr4jYqPy1DHOviNio\u002fLUMc6+I2Kj8tQxzr4jY6Py1DHOviNjo\u002fLUMc6+I2Oj8tQxzr4jY6Py1DHOviNjo\u002fLUMc6+I2Oj\u002f8qfHSTWJQP\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYnA\u002f\u002fKnx0k1icD\u002f8qfHSTWJwP\u002fFo44i1+AQ\u002f8WjjiLX4BD8tQxzr4jYaPy1DHOviNho\u002fLUMc6+I2Kj8tQxzr4jYqPy1DHOviNio\u002fLUMc6+I2Oj8tQxzr4jY6Py1DHOviNjo\u002fLUMc6+I2Oj8tQxzr4jY6Py1DHOviNjo\u002fLUMc6+I2Oj\u002f8qfHSTWJQP\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYlA\u002f\u002fKnx0k1icD\u002f8qfHSTWJwP\u002fyp8dJNYnA\u002f\u002fKnx0k1icD\u002f8qfHSTWJwP\u002fyp8dJNYnA\u002fexSuR+F6hD97FK5H4XqEP3sUrkfheoQ\u002fexSuR+F6hD97FK5H4XqEP\u002fFo44i1+AQ\u002f8WjjiLX4BD8tQxzr4jYaPy1DHOviNho\u002fLUMc6+I2Kj8tQxzr4jYqPy1DHOviNjo\u002fLUMc6+I2Oj8tQxzr4jY6P\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYnA\u002f\u002fKnx0k1icD\u002f8qfHSTWJwP3sUrkfheoQ\u002f8WjjiLX45D7xaOOItfjkPvFo44i1+OQ+8WjjiLX45D7xaOOItfjkPvFo44i1+AQ\u002f8WjjiLX4BD\u002fxaOOItfgEP\u002fFo44i1+AQ\u002f8WjjiLX4BD8tQxzr4jYaPy1DHOviNho\u002fLUMc6+I2Gj8tQxzr4jYaPy1DHOviNho\u002fLUMc6+I2Oj8tQxzr4jY6Py1DHOviNjo\u002fLUMc6+I2Oj8tQxzr4jY6Py1DHOviNjo\u002fLUMc6+I2Oj8tQxzr4jY6Py1DHOviNjo\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJwP\u002fyp8dJNYnA\u002f\u002fKnx0k1icD\u002f8qfHSTWJwP\u002fyp8dJNYnA\u002f\u002fKnx0k1icD\u002f8qfHSTWJwP\u002fyp8dJNYnA\u002f\u002fKnx0k1icD97FK5H4XqEP3sUrkfheoQ\u002fexSuR+F6hD97FK5H4XqEP3sUrkfheoQ\u002fexSuR+F6hD97FK5H4XqEP3sUrkfheoQ\u002fexSuR+F6hD97FK5H4XqEPy1DHOviNjo\u002fLUMc6+I2Oj8tQxzr4jY6P\u002fyp8dJNYlA\u002f\u002fKnx0k1iUD\u002f8qfHSTWJQP\u002fyp8dJNYnA\u002f\u002fKnx0k1icD\u002f8qfHSTWJwP3sUrkfheoQ\u002fexSuR+F6hD97FK5H4XqEPw=="},"y":{"dtype":"f8","bdata":"AAAAAAAAKkAAAAAAAAAuQAAAAAAAAPA\u002fAAAAAAAAFEAAAAAAAAAcQAAAAAAAACJAAAAAAAAAKkAAAAAAAAAuQAAAAAAAAPA\u002fAAAAAAAAFEAAAAAAAAAcQAAAAAAAACJAAAAAAAAAJkAAAAAAAAAqQAAAAAAAAPA\u002fAAAAAAAACEAAAAAAAAAUQAAAAAAAABxAAAAAAAAAIkAAAAAAAAAmQAAAAAAAACpAAAAAAAAA8D8AAAAAAAAIQAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQAAAAAAAACZAAAAAAAAAKkAAAAAAAAAIQAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQAAAAAAAAPA\u002fAAAAAAAACEAAAAAAAAAUQAAAAAAAABxAAAAAAAAAIkAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAMUAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAMUAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAMUAAAAAAAAAUQAAAAAAAABxAAAAAAAAAIkAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAFEAAAAAAAAAcQAAAAAAAACJAAAAAAAAAJkAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAMUAAAAAAAAAIQAAAAAAAACJAAAAAAAAAJkAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAMUAAAAAAAAAmQAAAAAAAACpAAAAAAAAALkAAAAAAAAAxQAAAAAAAACpAAAAAAAAALkAAAAAAAAAxQAAAAAAAACpAAAAAAAAALkAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAKkAAAAAAAAAuQAAAAAAAADFAAAAAAAAACEAAAAAAAAAUQAAAAAAAABxAAAAAAAAAIkAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAMUAAAAAAAADwPwAAAAAAAAhAAAAAAAAAFEAAAAAAAAAcQAAAAAAAACJAAAAAAAAAKkAAAAAAAAAuQAAAAAAAADFAAAAAAAAACEAAAAAAAAAUQAAAAAAAABxAAAAAAAAAIkAAAAAAAAAuQAAAAAAAADFAAAAAAAAA8D8AAAAAAAAIQAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQAAAAAAAACpAAAAAAAAALkAAAAAAAAAqQAAAAAAAAC5AAAAAAAAALkAAAAAAAAAxQAAAAAAAACpAAAAAAAAALkAAAAAAAAAxQAAAAAAAACpAAAAAAAAALkAAAAAAAAAxQAAAAAAAACpAAAAAAAAALkAAAAAAAAAxQAAAAAAAACpAAAAAAAAAKkAAAAAAAAAuQAAAAAAAADFAAAAAAAAAM0AAAAAAAAA1QAAAAAAAACpAAAAAAAAALkAAAAAAAAAxQAAAAAAAADNAAAAAAAAANUAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAMUAAAAAAAAAzQAAAAAAAADVAAAAAAAAACEAAAAAAAAAUQAAAAAAAABxAAAAAAAAAIkAAAAAAAAAqQAAAAAAAAC5AAAAAAAAAMUAAAAAAAAAzQAAAAAAAADVAAAAAAAAA8D8AAAAAAAAIQAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQAAAAAAAACpAAAAAAAAALkAAAAAAAAAxQAAAAAAAADNAAAAAAAAANUAAAAAAAAAIQAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQAAAAAAAACpAAAAAAAAALkAAAAAAAAAxQAAAAAAAADNAAAAAAAAANUAAAAAAAADwPwAAAAAAAAhAAAAAAAAAFEAAAAAAAAAcQAAAAAAAACJAAAAAAAAAKkAAAAAAAAAuQAAAAAAAADFAAAAAAAAAM0AAAAAAAAA1QAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQAAAAAAAABRAAAAAAAAAHEAAAAAAAAAiQA=="},"z":{"dtype":"i1","bdata":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQeHh4eHh4eHh4eHh4eHh4eKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgtLS0tLS0tLS0tLS0="},"type":"scatter3d","hoverinfo":"none"}],                        {"template":{"layout":{"coloraxis":{"colorbar":{"tickfont":{"color":"#334155"}}},"font":{"color":"#222222","family":"Times New Roman, Times, serif","size":14},"hoverlabel":{"bgcolor":"#ffffff","font":{"color":"#172033"}},"paper_bgcolor":"#fbfcfe","plot_bgcolor":"#fbfcfe","scene":{"bgcolor":"#fbfcfe","xaxis":{"backgroundcolor":"#fbfcfe","gridcolor":"#dfe4ec"},"yaxis":{"backgroundcolor":"#fbfcfe","gridcolor":"#dfe4ec"},"zaxis":{"backgroundcolor":"#fbfcfe","gridcolor":"#dfe4ec"}},"title":{"font":{"color":"#111111","size":17}},"xaxis":{"gridcolor":"#e5e9f0","linecolor":"#cbd3df","zerolinecolor":"#cbd3df"},"yaxis":{"gridcolor":"#e5e9f0","linecolor":"#cbd3df","zerolinecolor":"#cbd3df"}}},"scene":{"domain":{"x":[0.0,1.0],"y":[0.0,1.0]},"xaxis":{"title":{"text":"Learning rate"},"type":"log","range":[-5.3,-1.7],"dtick":1,"exponentformat":"e","showexponent":"all"},"yaxis":{"title":{"text":"CFG scale"},"range":[-1.0,23.0]},"zaxis":{"title":{"text":"Guidance step"},"range":[-4.5,49.5]},"camera":{"projection":{"type":"perspective"},"eye":{"x":1.6,"y":1.6,"z":1.1}},"aspectratio":{"x":1.0,"y":1.0,"z":1.0},"aspectmode":"manual"},"coloraxis":{"colorbar":{"title":{"text":"Alignment"},"tickmode":"array","tickvals":[3.0,3.76,3.84],"ticktext":["\u2264 3.0","SD1.5 baseline 3.76","max 3.84"]},"colorscale":[[0.0,"#30123b"],[0.07142857142857142,"#4145ab"],[0.14285714285714285,"#4675ed"],[0.21428571428571427,"#39a2fc"],[0.2857142857142857,"#1bcfd4"],[0.35714285714285715,"#24eca6"],[0.42857142857142855,"#61fc6c"],[0.5,"#a4fc3b"],[0.5714285714285714,"#d1e834"],[0.6428571428571429,"#f3c63a"],[0.7142857142857143,"#fe9b2d"],[0.7857142857142857,"#f36315"],[0.8571428571428571,"#d93806"],[0.9285714285714286,"#b11901"],[1.0,"#7a0402"]],"cmin":3.0,"cmax":3.8651999999999997,"autocolorscale":false},"legend":{"tracegroupgap":0,"itemsizing":"constant"},"margin":{"t":25,"l":55,"r":35,"b":55},"title":{}},                        {"responsive": true, "displaylogo": false, "scrollZoom": true, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}                    )                };            </script>        </div>
+    </div>
+    <script>
+      (() => {
+        const plot = document.getElementById("alignment-parameter-space-plot");
+        const info = document.getElementById("alignment-parameter-space-info");
+        const initialText = "Наведите курсор на точку, чтобы увидеть подробности.";
+        let resetTimer = null;
+
+        const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+        })[character]);
+        const fixed = (value, digits = 2) =>
+          Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : "—";
+        const scientific = value =>
+          Number.isFinite(Number(value)) ? Number(value).toExponential(1) : "—";
+        const markerValue = point => {
+          const color = point.data && point.data.marker && point.data.marker.color;
+          return Array.isArray(color) || ArrayBuffer.isView(color)
+            ? color[point.pointNumber]
+            : color;
+        };
+        const formatPoint = point => {
+          const data = point.customdata || [];
+          return `learning rate = ${scientific(point.x)}, ` +
+            `CFG = ${fixed(point.y, 0)}, guidance step = ${fixed(point.z, 0)}, ` +
+            `mean alignment = ${fixed(data[0])}, mean quality = ${fixed(data[1])}`;
+        };
+
+        plot.on("plotly_hover", event => {
+          if (resetTimer !== null) {
+            clearTimeout(resetTimer);
+            resetTimer = null;
+          }
+          const point = event.points && event.points[0];
+          if (point) info.innerHTML = formatPoint(point);
+        });
+        plot.on("plotly_unhover", () => {
+          if (resetTimer !== null) clearTimeout(resetTimer);
+          resetTimer = setTimeout(() => {
+            resetTimer = null;
+            info.textContent = initialText;
+          }, 140);
+        });
+      })();
+    </script>
+    </body>
+</html>
