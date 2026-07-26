@@ -5,6 +5,7 @@ import re
 import shutil
 import sys
 from html import escape
+from io import BytesIO
 from pathlib import Path
 
 import matplotlib as mpl
@@ -15,6 +16,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.offline import get_plotlyjs
+from PIL import Image
 import yaml
 
 
@@ -114,17 +116,29 @@ def load_guided_params(run_dir: Path):
 
 def publish_image(path: Path) -> str:
     path = path.resolve()
+    lossless = False
     if path.is_relative_to(GEN_DIR.resolve()):
         relative = Path("generations") / path.relative_to(GEN_DIR.resolve())
     elif path.is_relative_to((REPO_ROOT / "figures").resolve()):
         relative = Path("figures") / path.relative_to(
             (REPO_ROOT / "figures").resolve()
         )
+        lossless = True
     else:
         raise ValueError(f"Image is outside known publication roots: {path}")
+    relative = relative.with_suffix(".webp")
     destination = ASSET_DIR / relative
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(path, destination)
+    with Image.open(path) as image:
+        if lossless or image.mode in {"RGBA", "LA"}:
+            image.save(destination, "WEBP", lossless=True, method=6)
+        else:
+            image.convert("RGB").save(
+                destination,
+                "WEBP",
+                quality=92,
+                method=6,
+            )
     return (Path(ASSET_DIR.name) / relative).as_posix()
 
 
@@ -499,9 +513,18 @@ def make_parameter_slices(agg: pd.DataFrame, baseline_alignment: float, best) ->
             cmap="turbo",
         )
         fig.colorbar(scalar, ax=axes[: len(guide_steps)].tolist(), label="mean alignment")
-        output_path = ASSET_DIR / "figures" / "alignment_parameter_slices.png"
+        output_path = ASSET_DIR / "figures" / "alignment_parameter_slices.webp"
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(output_path, format="png", dpi=180, facecolor=fig.get_facecolor())
+        png_buffer = BytesIO()
+        fig.savefig(
+            png_buffer,
+            format="png",
+            dpi=180,
+            facecolor=fig.get_facecolor(),
+        )
+        png_buffer.seek(0)
+        with Image.open(png_buffer) as image:
+            image.save(output_path, "WEBP", lossless=True, method=6)
         plt.close(fig)
     return (Path(ASSET_DIR.name) / "figures" / output_path.name).as_posix()
 
@@ -2435,7 +2458,7 @@ def main():
         figure(
             1,
             "fig-guided-pipeline",
-            f'<img class="full-image pipeline-image" src="{pipeline_uri}?v=wave5-cfg11" alt="Схема VLM-guided генерации">',
+            f'<img class="full-image pipeline-image" src="{pipeline_uri}?v=wave5-cfg11-webp" alt="Схема VLM-guided генерации">',
             "Схема VLM-guided генерации. Латент обновляется по градиенту VLM loss, после чего изображение повторно генерируется с тем же закэшированным DDPM noise.",
         ),
         figure(

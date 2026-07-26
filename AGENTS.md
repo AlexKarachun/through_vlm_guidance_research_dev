@@ -272,6 +272,16 @@ Assets and the local Plotly bundle live in:
 experiments/wave_5/external/wave_5_report_assets/
 ```
 
+Published report images use WebP to keep the GitHub Pages bundle compact:
+
+- generated images use WebP quality 92 with method 6;
+- diagrams and plot-like assets use lossless WebP;
+- original PNG experiment outputs remain untouched under
+  `experiments/wave_5/generations/` and `figures/`.
+
+Keep this behavior in `publish_image(...)`; do not revert published copies to
+PNG without a specific reason.
+
 All 11 current chart files are used by the website. Do not delete either 3D
 chart merely because it is not referenced by `data-chart-src`: the two 3D
 charts are iframes.

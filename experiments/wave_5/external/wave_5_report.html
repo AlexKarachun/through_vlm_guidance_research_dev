@@ -335,7 +335,7 @@
       <p>Шаг оптимизации латента имеет вид: <i>X</i>′<sub>t</sub> = <i>X</i><sub>t</sub> − η∇<sub><i>X</i><sub>t</sub></sub>ℒ<sub>VLM</sub>. После обновления мы ещё раз запускаем denoise из <i>X</i>′<sub>t</sub>. Чтобы сравнение было честным, во всех повторных генерациях используем тот же закэшированный DDPM noise. За счёт этого изменения в изображении связаны именно с guidance, а не с новыми случайными числами. Этот цикл оптимизации можно повторять несколько раз — мы так и делаем. Общая схема одной итерации показана на <a href="#fig-guided-pipeline">рис. 1</a>.</p>
       
     <figure class="report-figure" id="fig-guided-pipeline">
-      <div class="figure-frame"><img class="full-image pipeline-image" src="wave_5_report_assets/figures/guided_generation_pipeline.png?v=wave5-cfg11" alt="Схема VLM-guided генерации"></div>
+      <div class="figure-frame"><img class="full-image pipeline-image" src="wave_5_report_assets/figures/guided_generation_pipeline.webp?v=wave5-cfg11-webp" alt="Схема VLM-guided генерации"></div>
       <figcaption><strong>Рисунок 1.</strong> Схема VLM-guided генерации. Латент <i>X</i><sub>t</sub> обновляется по градиенту VLM loss, после чего изображение повторно генерируется с тем же закэшированным DDPM noise.</figcaption>
     </figure>
 
