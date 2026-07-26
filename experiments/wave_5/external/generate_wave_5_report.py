@@ -2211,7 +2211,7 @@ def main():
                 </figcaption>
               </figure>
               <figure class="guided-example">
-                <div class="comparison-image-label">GUIDED · VLM guidance</div>
+                <div class="comparison-image-label">GUIDED · SD1.5</div>
                 <img src="${{row.guided_image}}" alt="Guided SD1.5">
                 <figcaption>
                   alignment ${{row.alignment_guided.toFixed(0)}},
