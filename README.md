@@ -100,6 +100,7 @@ HYDRA_FULL_ERROR=1 python run.py \
 
 <br>
 Технические отчеты о ходе работы можно найти здесь
+
 - <a href="https://alexkarachun.github.io/through_vlm_guidance_research_dev/experiments/wave_5/external/wave_5_report.html">Wave 5 report</a>
 - Старая версия проекта с первыми спринтами: <a href="https://github.com/AlexKarachun/vlm_guidance_research">report</a>
 
