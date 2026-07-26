@@ -10,8 +10,8 @@
 ## Установка
 
 ```bash
-git clone https://github.com/AlexKarachun/through_vlm_guidance_research.git
-cd through_vlm_guidance_research
+git clone https://github.com/AlexKarachun/through_vlm_guidance_research_dev.git
+cd through_vlm_guidance_research_dev
 conda env create -f environment.yml
 conda activate through_guidance
 ```
@@ -100,9 +100,7 @@ HYDRA_FULL_ERROR=1 python run.py \
 
 <br>
 Технические отчеты о ходе работы можно найти здесь
-
-- <a href="https://alexkarachun.github.io/through_vlm_guidance_research/experiments/wave_5/external/wave_5_report.html">Wave 5 report</a>
-
+- <a href="https://alexkarachun.github.io/through_vlm_guidance_research_dev/experiments/wave_5/external/wave_5_report.html">Wave 5 report</a>
 
 
 
@@ -119,7 +117,7 @@ todo
 
 
 
-- оформить гитхаб (through_vlm_guidance_research, RAEDME - описание, картинки, ссылку на отчет)
+- оформить гитхаб (through_vlm_guidance_research_dev, RAEDME - описание, картинки, ссылку на отчет)
 
 
 
@@ -143,10 +141,8 @@ todo
 
 
 
-git clone https://github.com/AlexKarachun/through_vlm_guidance_research_dev.git
-cd through_vlm_guidance_research_dev
-conda env create -f environment.yml
-conda activate through_guidance
+
+
 
 
 -->
