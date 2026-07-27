@@ -7,6 +7,14 @@
 
 Мы пытаемся повысить корректность генерируемых диффузионными моделями изображений с помощью нашего VLM guided пайплайна семплинга. В целом наш подход похож на classifier guidance, но вместо классификатора мы используем VLM. Мы генерируем изображение, вычисляем VLM loss и проводим градиент обратно до выбранного латента сквозь диффузионную генерацию.После обновления `X_t` изображение генерируется повторно.
 
+
+
+Технические отчеты о ходе работы можно найти здесь
+
+- <a href="https://alexkarachun.github.io/through_vlm_guidance_research_dev/experiments/wave_5/external/wave_5_report.html">Wave 5 report</a>
+- Старая версия проекта с ранними спринтами тут: <a href="https://github.com/AlexKarachun/vlm_guidance_research">vlm_guidance_research</a>
+
+
 ## Установка
 
 ```bash
@@ -79,7 +87,7 @@ HYDRA_FULL_ERROR=1 python run.py \
   pipeline.params.judgment_results_file=generations/judgment_qwen3vl8b.csv
 ```
 
-## Потребление VRAM
+## Характеристики
 
 | Pipeline | Модель | VRAM |
 |---|---|---:|
@@ -98,11 +106,6 @@ HYDRA_FULL_ERROR=1 python run.py \
 - RTX PRO 6000 96 GB vram
 
 
-<br>
-Технические отчеты о ходе работы можно найти здесь
-
-- <a href="https://alexkarachun.github.io/through_vlm_guidance_research_dev/experiments/wave_5/external/wave_5_report.html">Wave 5 report</a>
-- Старая версия проекта с первыми спринтами: <a href="https://github.com/AlexKarachun/vlm_guidance_research">report</a>
 
 
 
@@ -116,6 +119,14 @@ todo
 - увеличим число итераций
 - уменьшим learning rate
 - проследим за градиентами (возможно взрываются)
+
+
+а именно
+- добработать код, чтобы хранить наблы после vlm, декодеры и всех таймстепов (чтобы смотреть на динамику норм набл во время backward)
+- проанализировать полученные наблы для какого нибудь типичного запуска (можно лучший взять)
+- запустить экспы на поиск оптимальных параметров при экстримально большом количестве итераций (50, 100)
+
+
 
 
 
